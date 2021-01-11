@@ -1,8 +1,8 @@
 package external.project.exceptions;
 
-public class AfterDate extends InvalidateMonth{
+public class AfterCurrentDateException extends InvalidMonth {
 
-    public AfterDate(String month) {
+    public AfterCurrentDateException(String month) {
         super(month);
     }
 

@@ -1,9 +1,9 @@
 package external.project.exceptions;
 
-public class InvalidateMonth extends Exception{
+public abstract class InvalidMonth extends Exception{
     protected String month;
 
-    public InvalidateMonth(String month){
+    public InvalidMonth(String month){
         this.month = month;
     }
 

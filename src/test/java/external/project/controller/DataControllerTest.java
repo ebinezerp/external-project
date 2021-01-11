@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import external.project.util.FileManager;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,30 +33,56 @@ public class DataControllerTest {
 
     @Test
     public void dataFileTest() throws Exception {
-        String date ="200404";
-        doCallRealMethod().when(fileManager).getData(date);
-        MvcResult result = mockMvc.perform(get("/data/"+date)).andReturn();
+        String fromMonth ="200404";
+        String toMonth = "200507";
+        doCallRealMethod().when(fileManager).getData(fromMonth,toMonth);
+        MvcResult result = mockMvc.perform(get("/data").param("frommonth",fromMonth).param("tomonth",toMonth)).andReturn();
         MockHttpServletResponse response = result.getResponse();
         assertEquals(response.getStatus(),200);
     }
 
     @Test
-    public void dataFileTestAfterCurrentDate() throws Exception {
-        String date ="202404";
-        doCallRealMethod().when(fileManager).getData(date);
-        MvcResult result = mockMvc.perform(get("/data/"+date)).andReturn();
+    public void dataFileTestWithOneDigitMonth() throws Exception {
+        String fromMonth ="200404";
+        String toMonth = "20057";
+        doCallRealMethod().when(fileManager).getData(fromMonth,toMonth);
+        MvcResult result = mockMvc.perform(get("/data").param("frommonth",fromMonth).param("tomonth",toMonth)).andReturn();
         MockHttpServletResponse response = result.getResponse();
-        assertEquals(response.getStatus(), HttpStatus.NOT_ACCEPTABLE.value());
-        assertEquals(response.getErrorMessage(),"Month always should be less than current");
+        assertEquals(response.getStatus(),200);
     }
 
     @Test
-    public void dataFileTestInvalidMonth() throws Exception {
-        String date ="202415";
-        doCallRealMethod().when(fileManager).getData(date);
-        MvcResult result = mockMvc.perform(get("/data/"+date)).andReturn();
+    public void dataFileTestWhenFromMonthIsAfterCurrentDate() throws Exception {
+        String fromMonth ="202404";
+        String toMonth = "200507";
+        doCallRealMethod().when(fileManager).getData(fromMonth,toMonth);
+        MvcResult result = mockMvc.perform(get("/data").param("frommonth",fromMonth).param("tomonth",toMonth)).andReturn();
         MockHttpServletResponse response = result.getResponse();
         assertEquals(response.getStatus(), HttpStatus.NOT_ACCEPTABLE.value());
-        assertEquals(response.getErrorMessage(),"Month always should be less than current");
+        assertEquals(response.getErrorMessage(),fromMonth+" is greater than current date");
+    }
+
+
+    @Test
+    public void dataFileTestWhenToMonthIsAfterCurrentDate() throws Exception {
+        String fromMonth ="201404";
+        String toMonth = "202507";
+        doCallRealMethod().when(fileManager).getData(fromMonth,toMonth);
+        MvcResult result = mockMvc.perform(get("/data").param("frommonth",fromMonth).param("tomonth",toMonth)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        assertEquals(response.getStatus(), HttpStatus.NOT_ACCEPTABLE.value());
+        assertEquals(response.getErrorMessage(),toMonth+" is greater than current date");
+    }
+
+
+    @Test
+    public void dataFileTestInvalidMonth() throws Exception {
+        String fromMonth ="200414";
+        String toMonth = "200507";
+        doCallRealMethod().when(fileManager).getData(fromMonth,toMonth);
+        MvcResult result = mockMvc.perform(get("/data").param("frommonth",fromMonth).param("tomonth",toMonth)).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        assertEquals(response.getStatus(), HttpStatus.NOT_ACCEPTABLE.value());
+        assertEquals(response.getErrorMessage(),"Month format should be in yyyyMM, not "+fromMonth);
     }
 }
